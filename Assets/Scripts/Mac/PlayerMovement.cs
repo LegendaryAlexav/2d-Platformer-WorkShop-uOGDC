@@ -13,11 +13,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private BoxCollider2D groundCheck;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Animator animator;
 
     private void Update() {
         horizontal = Input.GetAxisRaw("Horizontal");
 
-        if(IsGrounded() && Input.GetButtonDown("Jump")) {
+        if (IsGrounded() && Input.GetButtonDown("Jump")) {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
 
@@ -27,22 +28,36 @@ public class PlayerMovement : MonoBehaviour
         }
 
         CheckFlip();
+        UpdateAnimator();
     }
+
 
     private void FixedUpdate() {
         rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
     }
+
+    #region - Checks -
 
     private bool IsGrounded() {
         //Check if the box colliders is colliding with the ground layer.
         grounded = Physics2D.OverlapAreaAll(groundCheck.bounds.min, groundCheck.bounds.max, groundLayer).Length > 0;
         return grounded;
     }
-
+    
     private void CheckFlip() {
         if (isFacingRight && horizontal < 0f || !isFacingRight && horizontal > 0f) {
             isFacingRight = !isFacingRight;
         }
     }
+
+    private void UpdateAnimator() {
+        animator.SetBool("IsGrounded", grounded);
+        animator.SetBool("IsFacingRight", isFacingRight);
+        animator.SetFloat("Horizontal", rb.velocity.x);
+        animator.SetFloat("Speed", Mathf.Abs(horizontal));
+        animator.SetFloat("Vertical", Mathf.Abs(rb.velocity.y));
+    }
+
+    #endregion
 
 }
